@@ -143,10 +143,11 @@ colorA_t directLighting_t::integrate(renderState_t &state, diffRay_t &ray) const
 		material->initBSDF(state, sp, bsdfs);
 		
 		if(bsdfs & BSDF_EMIT) col += material->emit(state, sp, wo);
-		if(bsdfs & BSDF_DIFFUSE) col += estimateDirect_PH(state, sp, lights, scene, wo, trShad, sDepth);
+		//if(bsdfs & (BSDF_DIFFUSE)) col += estimateDirect_PH(state, sp, lights, scene, wo, trShad, sDepth);
+		if(bsdfs & (BSDF_DIFFUSE|BSDF_TRANSLUCENT)) col += estimateDirect_PH(state, sp, lights, scene, wo, trShad, sDepth);
 		if(bsdfs & BSDF_DIFFUSE) col += estimatePhotons(state, sp, causticMap, wo, nSearch, cRadius);
 		if(bsdfs & BSDF_TRANSLUCENT) col += estimateSSSMaps(state, sp, SSSMaps, wo );
-		if((bsdfs & BSDF_DIFFUSE) && do_AO) col += sampleAO(state, sp, wo);
+		if((bsdfs & (BSDF_DIFFUSE|BSDF_TRANSLUCENT)) && do_AO) col += sampleAO(state, sp, wo);
 		
 		recursiveRaytrace(state, ray, rDepth, bsdfs, sp, wo, col, alpha);
 		
@@ -193,7 +194,7 @@ color_t directLighting_t::sampleAO(renderState_t &state, const surfacePoint_t &s
 		lightRay.tmin = YAF_SHADOW_BIAS; // < better add some _smart_ self-bias value...this is still bad...
 		lightRay.tmax = AO_dist;
 		
-		sample_t s(s1, s2, BSDF_GLOSSY | BSDF_DIFFUSE | BSDF_REFLECT );
+		sample_t s(s1, s2, BSDF_GLOSSY | BSDF_DIFFUSE | BSDF_REFLECT | BSDF_TRANSLUCENT);
 		surfCol = material->sample(state, sp, wo, lightRay.dir, s);
 		
 		if(material->getFlags() & BSDF_EMIT)
