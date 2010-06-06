@@ -29,30 +29,12 @@
 __BEGIN_YAFRAY
 
 class photonMap_t;
-class photon_t;
 
 //from common.cc
 color_t estimateDirect_PH(renderState_t &state, const surfacePoint_t &sp, const std::vector<light_t *> &lights, scene_t *scene, const vector3d_t &wo, bool trShad, int sDepth);
 color_t estimatePhotons(renderState_t &state, const surfacePoint_t &sp, const photonMap_t &map, const vector3d_t &wo, int nSearch, PFLOAT radius);
-color_t estimateSSSMaps(renderState_t &state, const surfacePoint_t &sp, const std::map<const object3d_t*, photonMap_t*> &SSSMaps, const vector3d_t &wo );
 
 bool createCausticMap(const scene_t &scene, const std::vector<light_t *> &all_lights, photonMap_t &cMap, int depth, int count, progressBar_t *pb = 0, std::string intName = "None");
-bool createSSSMaps( const scene_t &scene, const std::vector<light_t *> &lights, std::map<const object3d_t*, photonMap_t*> &SSSMaps, int depth, int count, progressBar_t *pb = 0, std::string intName = "None" );
-
-color_t dipole(const photon_t& inPhoton, const surfacePoint_t &sp, const vector3d_t &wo, float IOR, float g, const color_t &sigmaS, const color_t &sigmaA );
-
-//! r_photon2: Square distance of photon path; ir_gather2: inverse of square gather radius
-inline float kernel(float r_photon2, float ir_gather2)
-{
-	float s = (1.f - r_photon2 * ir_gather2);
-	return 3.f * ir_gather2 * M_1_PI * s * s;
-}
-
-inline float ckernel(float r_photon2, float r_gather2, float ir_gather2)
-{
-	float r_p=fSqrt(r_photon2), ir_g=fISqrt(r_gather2);
-	return 3.f * (1.f - r_p*ir_g) * ir_gather2 * M_1_PI;
-}
 
 __END_YAFRAY
 
