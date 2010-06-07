@@ -44,6 +44,12 @@ class YAFRAYCORE_EXPORT mcIntegrator_t: public tiledIntegrator_t
 		/*! Samples ambient occlusion for a given surface point */
 		virtual color_t sampleAmbientOcclusion(renderState_t &state, const surfacePoint_t &sp, const vector3d_t &wo) const;
 		
+		/*! Creates SSS photon map for different objects*/
+		virtual bool createSSSMaps();
+		/*! Estimates SSS photons for a given surface point of one specified objec*/
+		virtual color_t estimateSSSMaps(renderState_t &state, const surfacePoint_t &sp, const vector3d_t &wo ) const;
+
+		
 		int rDepth; //! Ray depth
 		bool trShad; //! Use transparent shadows
 		int sDepth; //! Shadow depth for transparent shadows
@@ -66,6 +72,9 @@ class YAFRAYCORE_EXPORT mcIntegrator_t: public tiledIntegrator_t
 		int nPaths; //! Number of samples for mc raytracing
 		int maxBounces; //! Max. path depth for mc raytracing
 		std::vector<light_t*> lights; //! An array containing all the scene lights
+		
+	
+		std::map<const object3d_t*, photonMap_t*>	SSSMaps; //! Container of SSS photons for different objects
 };
 
 __END_YAFRAY
