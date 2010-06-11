@@ -430,6 +430,7 @@ CFLOAT shinyDiffuseMat_t::getAlpha(const renderState_t &state, const surfacePoin
 bool shinyDiffuseMat_t::scatterPhoton(const renderState_t &state, const surfacePoint_t &sp, const vector3d_t &wi, vector3d_t &wo, pSample_t &s) const
 {
 	color_t scol = sample(state, sp, wi, wo, s);
+	
 	if(s.pdf > 1.0e-6f)
 	{
 		color_t cnew = s.lcol * s.alpha * scol * (std::fabs(wo*sp.N)/s.pdf);
