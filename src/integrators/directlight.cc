@@ -78,14 +78,14 @@ bool directLighting_t::preprocess()
 	}
 	{
 		//success = createSSSMaps();
-//		success = createSSSMapsByPhotonTracing();
-//		set << "SSS shoot:" << nCausPhotons << " photons. ";
-//		std::map<const object3d_t*, photonMap_t*>::iterator it = SSSMaps.begin();
-//		while (it!=SSSMaps.end()) {
-//			it->second->updateTree();
-//			Y_INFO << "SSS:" << it->second->nPhotons() << " photons. " << yendl;
-//			it++;
-//		}
+		success = createSSSMapsByPhotonTracing();
+		set << "SSS shoot:" << nCausPhotons << " photons. ";
+		std::map<const object3d_t*, photonMap_t*>::iterator it = SSSMaps.begin();
+		while (it!=SSSMaps.end()) {
+			it->second->updateTree();
+			Y_INFO << "SSS:" << it->second->nPhotons() << " photons. " << yendl;
+			it++;
+		}
 	}
 	
 	if(useAmbientOcclusion)
@@ -132,7 +132,7 @@ colorA_t directLighting_t::integrate(renderState_t &state, diffRay_t &ray) const
 		
 		if (bsdfs & BSDF_TRANSLUCENT) {
 			//col += estimateAllDirectLight(state, sp, wo);
-			//col += estimateSSSMaps(state,sp,wo);
+			col += estimateSSSMaps(state,sp,wo);
 			//col += estimateSSSSingleScattering(state,sp,wo);
 			//col += estimateSSSSingleScatteringPhotons(state,sp,wo);
 			col += estimateSSSSingleSImportantSampling(state,sp,wo);
@@ -161,6 +161,8 @@ integrator_t* directLighting_t::factory(paraMap_t &params, renderEnvironment_t &
 	int shadowDepth=5;
 	int raydepth=5, cDepth=10;
 	int search=100, photons=500000;
+	int sssdepth = 10, sssPhotons = 200000;
+	int singleSSamples = 128;
 	int AO_samples = 32;
 	double cRad = 0.25;
 	double AO_dist = 1.0;
@@ -179,6 +181,11 @@ integrator_t* directLighting_t::factory(paraMap_t &params, renderEnvironment_t &
 	params.getParam("AO_distance", AO_dist);
 	params.getParam("AO_color", AO_col);
 	
+	
+	params.getParam("sssPhotons", sssPhotons);
+	params.getParam("sssDepth", sssdepth);
+	params.getParam("singleScatterSamples", singleSSamples);
+	
 	directLighting_t *inte = new directLighting_t(transpShad, shadowDepth, raydepth);
 	// caustic settings
 	inte->usePhotonCaustics = caustics;
@@ -191,6 +198,10 @@ integrator_t* directLighting_t::factory(paraMap_t &params, renderEnvironment_t &
 	inte->aoSamples = AO_samples;
 	inte->aoDist = (PFLOAT)AO_dist;
 	inte->aoCol = AO_col;
+	// sss settings
+	inte->nSSSPhotons = sssPhotons;
+	inte->nSSSDepth = sssdepth;
+	inte->nSingleScatterSamples = singleSSamples;
 	return inte;
 }
 

@@ -80,7 +80,9 @@ class YAFRAYCORE_EXPORT mcIntegrator_t: public tiledIntegrator_t
 		int maxBounces; //! Max. path depth for mc raytracing
 		std::vector<light_t*> lights; //! An array containing all the scene lights
 		
-	
+		unsigned int nSSSPhotons;
+		int nSSSDepth;
+		unsigned int nSingleScatterSamples;
 		std::map<const object3d_t*, photonMap_t*>	SSSMaps; //! Container of SSS photons for different objects
 	public:
 		static float sssScale;
