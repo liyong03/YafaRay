@@ -135,7 +135,7 @@ colorA_t directLighting_t::integrate(renderState_t &state, diffRay_t &ray) const
 			col += estimateSSSMaps(state,sp,wo);
 			//col += estimateSSSSingleScattering(state,sp,wo);
 			//col += estimateSSSSingleScatteringPhotons(state,sp,wo);
-			col += estimateSSSSingleSImportantSampling(state,sp,wo);
+			//col += estimateSSSSingleSImportantSampling(state,sp,wo);
 		}
 		
 		recursiveRaytrace(state, ray, bsdfs, sp, wo, col, alpha);
@@ -202,6 +202,7 @@ integrator_t* directLighting_t::factory(paraMap_t &params, renderEnvironment_t &
 	inte->nSSSPhotons = sssPhotons;
 	inte->nSSSDepth = sssdepth;
 	inte->nSingleScatterSamples = singleSSamples;
+	inte->isDirectLight = true;
 	return inte;
 }
 
