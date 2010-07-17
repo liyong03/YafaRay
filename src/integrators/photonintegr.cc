@@ -1120,6 +1120,7 @@ integrator_t* photonIntegrator_t::factory(paraMap_t &params, renderEnvironment_t
 	
 	int sssdepth = 10, sssPhotons = 200000;
 	int singleSSamples = 128;
+	float sScale = 40.f;
 	
 	params.getParam("transpShad", transpShad);
 	params.getParam("shadowDepth", shadowDepth);
@@ -1142,6 +1143,7 @@ integrator_t* photonIntegrator_t::factory(paraMap_t &params, renderEnvironment_t
 	params.getParam("sssPhotons", sssPhotons);
 	params.getParam("sssDepth", sssdepth);
 	params.getParam("singleScatterSamples", singleSSamples);
+	params.getParam("sssScale", sScale);
 	
 	photonIntegrator_t* ite = new photonIntegrator_t(numPhotons, numCPhotons, transpShad, shadowDepth, dsRad, cRad);
 	ite->rDepth = raydepth;
@@ -1159,6 +1161,7 @@ integrator_t* photonIntegrator_t::factory(paraMap_t &params, renderEnvironment_t
 	ite->nSSSDepth = sssdepth;
 	ite->nSingleScatterSamples = singleSSamples;
 	ite->isDirectLight = false;
+	ite->sssScale = sScale;
 	return ite;
 }
 
