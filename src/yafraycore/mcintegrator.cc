@@ -374,18 +374,18 @@ bool mcIntegrator_t::createCausticMap()
 	return true;
 }
 
-color_t mcIntegrator_t::estimateCausticPhotons(renderState_t &state, const surfacePoint_t &sp, const vector3d_t &wo) const
+inline color_t mcIntegrator_t::estimateCausticPhotons(renderState_t &state, const surfacePoint_t &sp, const vector3d_t &wo) const
 {
 	if(!causticMap.ready()) return color_t(0.f);
 	
-	foundPhoton_t *gathered = (foundPhoton_t *)alloca(nCausSearch * sizeof(foundPhoton_t));
+	foundPhoton_t *gathered = new foundPhoton_t[nCausSearch];//(foundPhoton_t *)alloca(nCausSearch * sizeof(foundPhoton_t));
 	int nGathered = 0;
 	
 	float gRadiusSquare = causRadius * causRadius;
 	
 	nGathered = causticMap.gather(sp.P, gathered, nCausSearch, gRadiusSquare);
 	
-	gRadiusSquare = 1.f / gRadiusSquare;
+	gRadiusSquare = 1.f / gRadiusSquare; 
 	
 	color_t sum(0.f);
 	
@@ -405,11 +405,13 @@ color_t mcIntegrator_t::estimateCausticPhotons(renderState_t &state, const surfa
 		}
 		sum *= 1.f / ( float(causticMap.nPaths()) );
 	}
-
+	
+	delete [] gathered;
+	
 	return sum;
 }
 
-void mcIntegrator_t::recursiveRaytrace(renderState_t &state, diffRay_t &ray, BSDF_t bsdfs, surfacePoint_t &sp, vector3d_t &wo, color_t &col, float &alpha) const
+inline void mcIntegrator_t::recursiveRaytrace(renderState_t &state, diffRay_t &ray, BSDF_t bsdfs, surfacePoint_t &sp, vector3d_t &wo, color_t &col, float &alpha) const
 {
 	const material_t *material = sp.material;
 	spDifferentials_t spDiff(sp, ray);
@@ -462,7 +464,7 @@ void mcIntegrator_t::recursiveRaytrace(renderState_t &state, diffRay_t &ray, BSD
 				}
 			}
 			
-			if((bsdfs&BSDF_VOLUMETRIC) && (vol=material->getVolumeHandler(sp.N * refRay.dir < 0)))
+			if((bsdfs&BSDF_VOLUMETRIC) && (vol=material->getVolumeHandler(sp.Ng * refRay.dir < 0)))
 			{
 				vol->transmittance(state, refRay, vcol);
 				dcol *= vcol;
@@ -493,8 +495,8 @@ void mcIntegrator_t::recursiveRaytrace(renderState_t &state, diffRay_t &ray, BSD
 			const volumeHandler_t *vol;
 			diffRay_t refRay;
 
-			hal2.setStart(offs - 1);
-			hal3.setStart(offs - 1);
+			hal2.setStart(offs);
+			hal3.setStart(offs);
 
 			for(int ns=0; ns<gsam; ++ns)
 			{
@@ -507,7 +509,7 @@ void mcIntegrator_t::recursiveRaytrace(renderState_t &state, diffRay_t &ray, BSD
 				float s1 = hal2.getNext();//RI_vdC(offs);
 				float s2 = hal3.getNext();//scrHalton(2, offs);
 
-				sample_t s(s1, s2, BSDF_REFLECT|BSDF_TRANSMIT|BSDF_GLOSSY);
+				sample_t s(s1, s2, BSDF_REFLECT|BSDF_TRANSMIT|BSDF_FILTER|BSDF_GLOSSY);
 				color_t mcol = material->sample(state, sp, wo, wi, s);
 
 				if(s.pdf > 1.0e-6f && (s.sampledFlags & BSDF_GLOSSY))
@@ -517,7 +519,7 @@ void mcIntegrator_t::recursiveRaytrace(renderState_t &state, diffRay_t &ray, BSD
 					gcol += (color_t)integrate(state, refRay) * mcol;
 				}
 
-				if((bsdfs&BSDF_VOLUMETRIC) && (vol=material->getVolumeHandler(sp.N * refRay.dir < 0)))
+				if((bsdfs&BSDF_VOLUMETRIC) && (vol=material->getVolumeHandler(sp.Ng * refRay.dir < 0)))
 				{
 					if(vol->transmittance(state, refRay, vcol)) gcol *= vcol;
 				}
@@ -697,6 +699,8 @@ bool mcIntegrator_t::createSSSMaps()
 		BSDF_t bsdfs = BSDF_NONE;
 		int nBounces=0;
 		const material_t *material = 0;
+		const volumeHandler_t *vol = 0;
+		
 		while( scene->intersect(ray, *hit2) )
 		{
 			if(isnan(pcol.R) || isnan(pcol.G) || isnan(pcol.B))
@@ -705,8 +709,9 @@ bool mcIntegrator_t::createSSSMaps()
 			// check for volumetric effects
 			if(material)
 			{
-				if((bsdfs&BSDF_VOLUMETRIC) && material->volumeTransmittance(state, *hit, ray, vcol))
+				if((bsdfs&BSDF_VOLUMETRIC) && (vol=material->getVolumeHandler(hit->Ng * ray.dir < 0)))
 				{
+					vol->transmittance(state, ray, vcol);
 					transm = vcol;
 				}
 			}
@@ -859,6 +864,7 @@ bool mcIntegrator_t::createSSSMapsByPhotonTracing()
 		BSDF_t bsdfs = BSDF_NONE;
 		int nBounces=0;
 		const material_t *material = 0;
+		const volumeHandler_t *vol = 0;
 		
 		bool isRefrectedOut = false;
 		
@@ -870,8 +876,9 @@ bool mcIntegrator_t::createSSSMapsByPhotonTracing()
 			// check for volumetric effects
 			if(material)
 			{
-				if((bsdfs&BSDF_VOLUMETRIC) && material->volumeTransmittance(state, *hit, ray, vcol))
+				if((bsdfs&BSDF_VOLUMETRIC) && (vol=material->getVolumeHandler(hit->Ng * ray.dir < 0)))
 				{
+					vol->transmittance(state, ray, vcol);
 					transm = vcol;
 				}
 			}

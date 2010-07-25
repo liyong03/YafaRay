@@ -56,7 +56,6 @@ class YAFRAYCORE_EXPORT mcIntegrator_t: public tiledIntegrator_t
 	
 		virtual color_t estimateSSSSingleScatteringPhotons(renderState_t &state, const surfacePoint_t &sp, const vector3d_t &wo) const;
 
-		
 		int rDepth; //! Ray depth
 		bool trShad; //! Use transparent shadows
 		int sDepth; //! Shadow depth for transparent shadows

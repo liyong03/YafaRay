@@ -271,7 +271,7 @@ bool photonIntegrator_t::preprocess()
 			
 			color_t transm(1.f);
 			color_t vcol(0.f);
-			const volumeHandler_t* vol;
+			const volumeHandler_t* vol = NULL;
 			
 			if(material)
 			{
@@ -642,7 +642,7 @@ bool photonIntegrator_t::preprocess()
 				
 				color_t transm(1.f);
 				color_t vcol(0.f);
-				const volumeHandler_t* vol;
+				const volumeHandler_t* vol = NULL;
 				
 				if(material)
 				{
@@ -1073,7 +1073,6 @@ colorA_t photonIntegrator_t::integrate(renderState_t &state, diffRay_t &ray) con
 		
 		// add caustics
 		if(bsdfs & BSDF_DIFFUSE) col += estimateCausticPhotons(state, sp, wo);
-		
 		
 		if(bsdfs & BSDF_TRANSLUCENT) 
 		{

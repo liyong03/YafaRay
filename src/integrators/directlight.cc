@@ -127,7 +127,7 @@ colorA_t directLighting_t::integrate(renderState_t &state, diffRay_t &ray) const
 		if(bsdfs & BSDF_DIFFUSE)
 		{
 			col += estimateAllDirectLight(state, sp, wo);
-			col += estimateCausticPhotons(state, sp, wo);
+			if(usePhotonCaustics) col += estimateCausticPhotons(state, sp, wo);
 			if(useAmbientOcclusion) col += sampleAmbientOcclusion(state, sp, wo);
 		}
 		
@@ -199,7 +199,7 @@ integrator_t* directLighting_t::factory(paraMap_t &params, renderEnvironment_t &
 	// AO settings
 	inte->useAmbientOcclusion = do_AO;
 	inte->aoSamples = AO_samples;
-	inte->aoDist = (PFLOAT)AO_dist;
+	inte->aoDist = AO_dist;
 	inte->aoCol = AO_col;
 	// sss settings
 	inte->usePhotonSSS = useSSS;

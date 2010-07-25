@@ -66,13 +66,19 @@ endif (WITH_YAF_PY_BINDINGS OR WITH_YAF_RUBY_BINDINGS)
 
 # Python bindings 
 if (WITH_YAF_PY_BINDINGS)
-	find_package(PythonLibs REQUIRED)
-	find_package(PythonInterp REQUIRED)
-	
-	if (NOT PYTHON_LIBRARY OR NOT PYTHON_EXECUTABLE)
+	if(YAF_PY_VERSION)
+		set(REQUIRED_PYTHON_VERSION ${YAF_PY_VERSION})
+	else(YAF_PY_VERSION)
+		set(REQUIRED_PYTHON_VERSION 2.6)
+	endif(YAF_PY_VERSION)
+	MESSAGE("Searching for Python ${REQUIRED_PYTHON_VERSION}")
+	find_package(Python3Libs REQUIRED)
+	if (NOT PYTHON_LIBRARIES)
 		message("Python wasn't found, please install it to build python bindings")
 		set(WITH_YAF_PY_BINDINGS OFF)
-	endif (NOT PYTHON_LIBRARY OR NOT PYTHON_EXECUTABLE)
+	else (NOT PYTHON_LIBRARIES)
+		message("Python ${REQUIRED_PYTHON_VERSION} found at: ${PYTHON_LIBRARIES}")
+	endif (NOT PYTHON_LIBRARIES)
 	
 endif (WITH_YAF_PY_BINDINGS)
 
@@ -118,7 +124,7 @@ else(NOT WIN32)
 	# installation directories
 
 	if(NOT YAF_BIN_DIR)
-		set(YAF_BIN_DIR winpak)
+		set(YAF_BIN_DIR Win32Pak)
 	endif(NOT YAF_BIN_DIR)
 
 	set(YAF_LIB_DIR ${YAF_BIN_DIR})
@@ -209,10 +215,6 @@ if (WITH_YAF_PY_BINDINGS)
 endif (WITH_YAF_PY_BINDINGS)
 
 # Generating config headers
-
-if(NOT WIN32)
-	set_property(TARGET PROPERTY PREFIX "")
-endif(NOT WIN32)
 
 include(CMakeConfig/GenConfHeaders.txt)
 
