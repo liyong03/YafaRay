@@ -1828,9 +1828,10 @@ color_t mcIntegrator_t::estimateSSSMaps(renderState_t &state, const surfacePoint
 	const material_t *material = sp.material;
 	material->initBSDF(state, sp, bsdfs);
 	
-	color_t sigma_s, sigma_a;
+	color_t sigma_s, sigma_a, diffuseC;
 	float IOR;
 	TranslucentData_t* dat = (TranslucentData_t*)state.userdata;
+	diffuseC = dat->difC;
 	sigma_a = dat->sig_a;
 	sigma_s = dat->sig_s;
 	IOR = dat->IOR;
@@ -1853,6 +1854,8 @@ color_t mcIntegrator_t::estimateSSSMaps(renderState_t &state, const surfacePoint
 	/*if (sum.energy() > 1.f ) {
 		std::cout << sp.P << std::endl;	
 	}*/
+	
+	sum *= diffuseC;
 	
 	state.userdata = o_udat;
 	
