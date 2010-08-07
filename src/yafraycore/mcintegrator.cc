@@ -1410,13 +1410,16 @@ color_t mcIntegrator_t::estimateSSSMaps(renderState_t &state, const surfacePoint
 	material->initBSDF(state, sp, bsdfs);
 	
 	color_t sigma_s, sigma_a, diffuseC;
-	float IOR, _g;
+	float IOR, _g, mTransl;
 	TranslucentData_t* dat = (TranslucentData_t*)state.userdata;
 	diffuseC = dat->difC;
 	sigma_a = dat->sig_a;
 	sigma_s = dat->sig_s;
 	IOR = dat->IOR;
 	_g = dat->g;
+	mTransl = dat->mTransl;
+	
+	//std::cout << "singmaS = " << sigma_s << std::endl;
 	
 	// sum all photon in translucent object
 	std::vector<const photon_t*> photons;
@@ -1439,6 +1442,7 @@ color_t mcIntegrator_t::estimateSSSMaps(renderState_t &state, const surfacePoint
 	}*/
 	
 	sum *= diffuseC;
+	sum *= mTransl;
 	
 	state.userdata = o_udat;
 	
@@ -1470,13 +1474,14 @@ color_t mcIntegrator_t::estimateSSSSingleScattering(renderState_t &state, const 
 	
 	color_t diffuseC;
 	color_t sigma_s, sigma_a, sigma_t;
-	float IOR;
+	float IOR, mTransl;
 	TranslucentData_t* dat = (TranslucentData_t*)state.userdata;
 	diffuseC = dat->difC;
 	sigma_a = dat->sig_a;
 	sigma_s = dat->sig_s;
 	sigma_t = sigma_s + sigma_a;
 	IOR = dat->IOR;
+	mTransl = dat->mTransl;
 
 	float Kr_o, Kt_o;
 	fresnel(wo, sp.N, IOR, Kr_o, Kt_o);	
@@ -1566,6 +1571,7 @@ color_t mcIntegrator_t::estimateSSSSingleScattering(renderState_t &state, const 
 	state.userdata = o_udat;
 	
 	singleS *= diffuseC;
+	singleS *= mTransl;
 	
 	return singleS;
 }
@@ -1597,13 +1603,14 @@ color_t mcIntegrator_t::estimateSSSSingleSImportantSampling(renderState_t &state
 	
 	color_t diffuseC;
 	color_t sigma_s, sigma_a, sigma_t;
-	float IOR;
+	float IOR,mTransl;
 	TranslucentData_t* dat = (TranslucentData_t*)state.userdata;
 	diffuseC = dat->difC;
 	sigma_a = dat->sig_a;
 	sigma_s = dat->sig_s;
 	sigma_t = sigma_s + sigma_a;
 	IOR = dat->IOR;
+	mTransl = dat->mTransl;
 	
 	float Kr_o, Kt_o;
 	fresnel(wo, sp.N, IOR, Kr_o, Kt_o);	
@@ -1729,6 +1736,7 @@ color_t mcIntegrator_t::estimateSSSSingleSImportantSampling(renderState_t &state
 //	}
 	
 	singleS *= diffuseC;
+	singleS *= mTransl;
 	
 	return singleS;
 }
@@ -1943,7 +1951,7 @@ color_t mcIntegrator_t::estimateSSSSingleScatteringPhotons(renderState_t &state,
 	
 	color_t diffuseC;
 	color_t sigma_s, sigma_a, sigma_t;
-	float IOR, _g=0.f;
+	float IOR, _g=0.f, mTransl;
 	TranslucentData_t* dat = (TranslucentData_t*)state.userdata;
 	diffuseC = dat->difC;
 	sigma_a = dat->sig_a;
@@ -1951,6 +1959,7 @@ color_t mcIntegrator_t::estimateSSSSingleScatteringPhotons(renderState_t &state,
 	sigma_t = sigma_s + sigma_a;
 	IOR = dat->IOR;
 	_g = dat->g;
+	mTransl = dat->mTransl;
 	
 	float Kr_o, Kt_o;
 	fresnel(wo, sp.N, IOR, Kr_o, Kt_o);	
@@ -2066,6 +2075,7 @@ color_t mcIntegrator_t::estimateSSSSingleScatteringPhotons(renderState_t &state,
 	state.userdata = o_udat;
 	
 	singleS *= diffuseC;
+	singleS *= mTransl;
 	
 	return singleS;
 }
